@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Car Price Guessing Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- Import Dfinity Agent from CDN -->
+    <script src="https://unpkg.com/@dfinity/agent/lib/agent.js"></script>
+    <script src="https://unpkg.com/@dfinity/candid/lib/candid.js"></script>
+    <script src="https://unpkg.com/@dfinity/principal/lib/principal.js"></script>
+</head>
+<body>
+    <div class="background-gradient"></div>
+    
+    <main class="app-container">
+        <!-- Header -->
+        <header>
+            <div class="logo">ICP<span class="highlight">Luxury</span></div>
+            <div class="progress-bar-container" id="progress-container" style="display: none;">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </header>
+
+        <!-- Loading Screen -->
+        <section id="loading-screen" class="screen active">
+            <div class="loader"></div>
+            <p>Connecting to the Internet Computer...</p>
+        </section>
+
+        <!-- Welcome Screen -->
+        <section id="welcome-screen" class="screen">
+            <div class="hero-content">
+                <h1>Test Your <br><span class="gradient-text">Automotive Knowledge</span></h1>
+                <p>Guess the correct price of 4 luxury vehicles. Can you get a perfect score?</p>
+                <button id="start-btn" class="primary-btn">Start Game</button>
+            </div>
+        </section>
+
+        <!-- Game Screen -->
+        <section id="game-screen" class="screen">
+            <div class="card-container">
+                <div class="car-image-wrapper">
+                    <img id="car-image" src="" alt="Car Image" class="car-image">
+                    <div class="image-overlay"></div>
+                </div>
+                <div class="question-content">
+                    <h2 id="car-name">Car Name</h2>
+                    <p class="instruction">Select the correct price:</p>
+                    <div id="options-container" class="options-grid">
+                        <!-- Options will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Screen -->
+        <section id="result-screen" class="screen">
+            <div class="result-card">
+                <div class="score-circle">
+                    <span id="score-display">0</span>
+                    <span class="total">/ 4</span>
+                </div>
+                <h2 id="result-message">Great Job!</h2>
+                <p>You've completed the challenge.</p>
+                <button id="restart-btn" class="secondary-btn">Play Again</button>
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="index.js"></script>
+</body>
+</html>
