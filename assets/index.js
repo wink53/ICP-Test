@@ -1,35 +1,9 @@
-// Imports from CDN
-import { Actor, HttpAgent } from "https://cdn.jsdelivr.net/npm/@dfinity/agent@0.20.0/+esm";
-import { IDL } from "https://cdn.jsdelivr.net/npm/@dfinity/candid@0.20.0/+esm";
+// This version uses a simpler approach without ES modules
+// We'll load the libraries via script tags in HTML and use them globally
 
 // Configuration
-const CANISTER_ID = "ebwns-iiaaa-aaaam-qdtta-cai"; // From your URL
+const CANISTER_ID = "ebwns-iiaaa-aaaam-qdtta-cai";
 const HOST = "https://icp0.io";
-
-// IDL Factory (Interface Definition Language)
-const idlFactory = ({ IDL }) => {
-    const CarId = IDL.Nat;
-    const Option = IDL.Record({ 'id': IDL.Nat, 'price': IDL.Nat });
-    const Question = IDL.Record({
-        'carId': CarId,
-        'carName': IDL.Text,
-        'carImage': IDL.Text,
-        'options': IDL.Vec(Option),
-    });
-    const Guess = IDL.Record({
-        'carId': CarId,
-        'selectedOptionId': IDL.Nat,
-    });
-    const Result = IDL.Record({
-        'score': IDL.Nat,
-        'maxScore': IDL.Nat,
-        'message': IDL.Text,
-    });
-    return IDL.Service({
-        'getQuestions': IDL.Func([], [IDL.Vec(Question)], ['query']),
-        'submitGuesses': IDL.Func([IDL.Vec(Guess)], [Result], []),
-    });
-};
 
 // State
 let actor = null;
@@ -57,25 +31,60 @@ const ui = {
     restartBtn: document.getElementById('restart-btn')
 };
 
+// IDL Factory
+const idlFactory = ({ IDL }) => {
+    const CarId = IDL.Nat;
+    const Option = IDL.Record({ 'id': IDL.Nat, 'price': IDL.Nat });
+    const Question = IDL.Record({
+        'carId': CarId,
+        'carName': IDL.Text,
+        'carImage': IDL.Text,
+        'options': IDL.Vec(Option),
+    });
+    const Guess = IDL.Record({
+        'carId': CarId,
+        'selectedOptionId': IDL.Nat,
+    });
+    const Result = IDL.Record({
+        'score': IDL.Nat,
+        'maxScore': IDL.Nat,
+        'message': IDL.Text,
+    });
+    return IDL.Service({
+        'getQuestions': IDL.Func([], [IDL.Vec(Question)], ['query']),
+        'submitGuesses': IDL.Func([IDL.Vec(Guess)], [Result], []),
+    });
+};
+
 // Initialization
 async function init() {
+    console.log("Starting initialization...");
     try {
-        const agent = new HttpAgent({ host: HOST });
+        // Wait for dfinity libraries to load
+        if (typeof window.ic === 'undefined' || typeof window.ic.HttpAgent === 'undefined') {
+            throw new Error("Dfinity libraries not loaded. Please refresh the page.");
+        }
 
-        // Create Actor
-        actor = Actor.createActor(idlFactory, {
+        console.log("Creating HttpAgent with host:", HOST);
+        const agent = new window.ic.HttpAgent({ host: HOST });
+
+        console.log("Creating Actor for canister:", CANISTER_ID);
+        actor = window.ic.Actor.createActor(idlFactory, {
             agent,
             canisterId: CANISTER_ID,
         });
 
-        // Fetch questions immediately to have them ready
+        console.log("Actor created. Fetching questions...");
         questions = await actor.getQuestions();
         console.log("Questions loaded:", questions);
 
         showScreen('welcome');
     } catch (error) {
         console.error("Initialization error:", error);
-        alert("Failed to connect to the Internet Computer. Check console for details.");
+        alert("Failed to connect: " + error.message);
+
+        const loadingText = document.querySelector('#loading-screen p');
+        if (loadingText) loadingText.textContent = "Error: " + error.message;
     }
 }
 
@@ -113,39 +122,33 @@ function renderQuestion() {
 
     const question = questions[currentQuestionIndex];
 
-    // Update UI
     ui.carName.textContent = question.carName;
     ui.carImage.src = question.carImage;
-
-    // Clear options
     ui.optionsContainer.innerHTML = '';
 
-    // Create buttons
     question.options.forEach(option => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
-        // Format price nicely
-        const price = Number(option.price).toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+        const price = Number(option.price).toLocaleString('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            maximumFractionDigits: 0
+        });
         btn.textContent = price;
-
         btn.onclick = () => selectOption(question.carId, option.id);
-
         ui.optionsContainer.appendChild(btn);
     });
 }
 
 function selectOption(carId, optionId) {
-    // Record guess
     userGuesses.push({
         carId: carId,
         selectedOptionId: optionId
     });
 
-    // Move to next question
     currentQuestionIndex++;
     updateProgress();
 
-    // Add a small delay for better UX
     setTimeout(() => {
         renderQuestion();
     }, 300);
