@@ -3,6 +3,15 @@
     "car_guessing_game": {
       "main": "main.mo",
       "type": "motoko"
+    },
+    "car_guessing_game_assets": {
+      "dependencies": [
+        "car_guessing_game"
+      ],
+      "source": [
+        "assets"
+      ],
+      "type": "assets"
     }
   },
   "defaults": {
