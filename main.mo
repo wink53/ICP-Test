@@ -2,7 +2,7 @@ import Array "mo:base/Array";
 import Buffer "mo:base/Buffer";
 import Nat "mo:base/Nat";
 
-actor CarGuessingGame {
+persistent actor CarGuessingGame {
 
   // Types must be defined inside the actor or imported
   type CarId = Nat;
